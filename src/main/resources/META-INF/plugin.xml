@@ -1,0 +1,48 @@
+<idea-plugin>
+    <id>com.opencodebuddy.files</id>
+    <name>OpenCode Buddy · Files to Context</name>
+    <version>1.0.0</version>
+    <vendor>opencode-buddy-files</vendor>
+
+    <idea-version since-build="262" until-build="263.*"/>
+
+    <depends>com.intellij.modules.platform</depends>
+    <!-- Lang is bundled and always present; needed to inspect PSI when the Rider
+         Solution Explorer exposes the selection as PsiElement rather than VirtualFile. -->
+    <depends>com.intellij.modules.lang</depends>
+    <!-- Required: guarantees this plugin loads AFTER the OpenCode Buddy host and can
+         see its classes (needed for the reflection bridge). The feature is meaningless
+         without the host, so there is no reason to load without it. -->
+    <depends>com.senjuobito.opencode-buddy</depends>
+
+    <description><![CDATA[
+        Adds two portable ways to insert project files into the OpenCode Buddy chat:
+        <ul>
+            <li><b>Add to OpenCode Context</b> — right-click a file (or multi-selection)
+            in the Project view / editor and choose <i>Add to OpenCode Context</i>.</li>
+            <li><b>Drag &amp; drop</b> — drag a file (or files) from the Project view
+            onto the OpenCode chat to insert them into the prompt.</li>
+        </ul>
+        The host OpenCode Buddy plugin is untouched and keeps updating normally.
+        This overlay talks to it through stable public entry points.
+    ]]></description>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <backgroundPostStartupActivity implementation="com.opencodebuddy.files.dnd.DndRegistrar"/>
+    </extensions>
+
+    <actions>
+        <action id="OpenCodeBuddyFiles.AddToContext"
+                class="com.opencodebuddy.files.action.AddToOpenCodeContextAction"
+                text="Add to OpenCode Context"
+                description="Add the selected files to the OpenCode chat context"
+                icon="AllIcons.General.Add">
+            <!-- Rider's Solution Explorer popup (SolutionExplorerPopupMenu) is created at
+                 runtime by Rider's core, so it can't be referenced here; DndRegistrar
+                 injects the action into it dynamically. Standard views/editor are wired
+                 declaratively here. -->
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>
